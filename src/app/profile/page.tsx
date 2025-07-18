@@ -83,34 +83,32 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Spinner /></div>;
+  if (loading) return <div className="flex items-center justify-center w-full h-full"><Spinner /></div>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
-      <div className="bg-white rounded-xl shadow-lg p-8 min-w-[320px]">
-        <h1 className="text-2xl font-bold text-blue-700 mb-4">Profile</h1>
-        {user && (
-          <div className="space-y-2">
-            <div><span className="font-extrabold text-black">User ID:</span> <span className="font-bold text-gray-900">{user.id || user._id || <span className="italic text-gray-400">Not provided</span>}</span></div>
-            <div><span className="font-extrabold text-black">Name:</span> <span className="font-bold text-gray-900">{user.name || <span className="italic text-gray-400">Not provided</span>}</span></div>
-            <div><span className="font-extrabold text-black">Email:</span> <span className="font-bold text-gray-900">{user.email || <span className="italic text-gray-400">Not provided</span>}</span></div>
-            <div><span className="font-extrabold text-black">Phone:</span> <span className="font-bold text-gray-900">{user.phone || <span className="italic text-gray-400">Not provided</span>}</span></div>
-          </div>
-        )}
-        <button
-          onClick={openModal}
-          className="mt-6 px-6 py-2 rounded-md bg-blue-600 text-white font-semibold text-lg shadow hover:bg-blue-700 transition-colors w-full"
-        >
-          Edit Profile
-        </button>
-      </div>
+    <div className="bg-white rounded-xl shadow-lg p-8 min-w-[320px] mx-auto flex flex-col items-center">
+      <h1 className="text-2xl font-bold text-blue-700 mb-4">Profile</h1>
+      {user && (
+        <div className="space-y-2">
+          <div><span className="font-extrabold text-black">User ID:</span> <span className="font-bold text-gray-900">{user.id || user._id || <span className="italic text-gray-400">Not provided</span>}</span></div>
+          <div><span className="font-extrabold text-black">Name:</span> <span className="font-bold text-gray-900">{user.name || <span className="italic text-gray-400">Not provided</span>}</span></div>
+          <div><span className="font-extrabold text-black">Email:</span> <span className="font-bold text-gray-900">{user.email || <span className="italic text-gray-400">Not provided</span>}</span></div>
+          <div><span className="font-extrabold text-black">Phone:</span> <span className="font-bold text-gray-900">{user.phone || <span className="italic text-gray-400">Not provided</span>}</span></div>
+        </div>
+      )}
+      <button
+        onClick={openModal}
+        className="mt-6 px-6 py-2 rounded-md bg-blue-600 text-white font-semibold text-lg shadow hover:bg-blue-700 transition-colors w-full cursor-pointer"
+      >
+        Edit Profile
+      </button>
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
             <button
               onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold"
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold cursor-pointer"
               aria-label="Close"
             >
               ×
@@ -173,7 +171,7 @@ export default function ProfilePage() {
               </div>
               <button
                 type="submit"
-                className="w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-200 bg-blue-600 hover:bg-blue-700"
+                className="w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-200 bg-blue-600 hover:bg-blue-700 cursor-pointer"
                 disabled={formLoading}
               >
                 {formLoading ? <Spinner /> : "Save Changes"}

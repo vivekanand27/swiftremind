@@ -5,22 +5,30 @@ import Link from "next/link";
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Spinner from "../components/Spinner";
+import { useUser } from "@/hooks/UserContext";
 
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState(""); // email or phone
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const [identifierError, setIdentifierError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const router = useRouter();
+  const { user, loading } = useUser();
 
-  const buttonDisabled = loading; // Only disable when loading
+  React.useEffect(() => {
+    if (!loading && user) {
+      router.push("/");
+    }
+  }, [loading, user, router]);
+
+  const buttonDisabled = formLoading; // Only disable when loading
 
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIdentifierError("");
     setPasswordError("");
-    setLoading(true);
+    setFormLoading(true);
     let hasError = false;
     if (!identifier) {
       setIdentifierError("Email or phone is required.");
@@ -31,7 +39,7 @@ const LoginPage = () => {
       hasError = true;
     }
     if (hasError) {
-      setLoading(false);
+      setFormLoading(false);
       return;
     }
     try {
@@ -40,6 +48,7 @@ const LoginPage = () => {
       const res = await axios.post("/api/users/login", payload);
       if (res.data.token) {
         localStorage.setItem('token', res.data.token);
+        window.dispatchEvent(new Event("profile-updated"));
         toast.success("Login successful!");
         router.push("/");
       } else {
@@ -52,13 +61,13 @@ const LoginPage = () => {
         "An error occurred. Please try again."
       );
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 relative">
-      {loading && (
+      {formLoading && (
         <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center z-50">
           <Spinner />
         </div>
@@ -99,14 +108,14 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={buttonDisabled}
-            className={`w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-200 ${buttonDisabled ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+            className={`w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-200 ${buttonDisabled ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 cursor-pointer"}`}
           >
-            {loading ? "Logging in..." : "Login"}
+            {formLoading ? "Logging in..." : "Login"}
           </button>
         </form>
         <div className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <Link href="/signup" className="text-blue-600 hover:underline font-medium">Sign up</Link>
+          <Link href="/signup" className="text-blue-600 hover:underline font-medium cursor-pointer">Sign up</Link>
         </div>
       </div>
     </div>

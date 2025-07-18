@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
 import Header from "./components/Header";
+import { UserProvider } from "@/hooks/UserContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,32 +30,34 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <Toaster
-          position="bottom-center"
-          toastOptions={{
-            style: {
-              background: '#1e293b', // dark blue-gray
-              color: '#fff',
-              // fontWeight: 'bold', // Remove bold text
-            },
-            success: {
+        <UserProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
               style: {
-                background: '#22c55e', // green
+                background: '#1e293b', // dark blue-gray
                 color: '#fff',
+                // fontWeight: 'bold', // Remove bold text
               },
-            },
-            error: {
-              style: {
-                background: '#ef4444', // red
-                color: '#fff',
+              success: {
+                style: {
+                  background: '#22c55e', // green
+                  color: '#fff',
+                },
               },
-            },
-          }}
-        />
-        <Header />
-        <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
-          {children}
-        </main>
+              error: {
+                style: {
+                  background: '#ef4444', // red
+                  color: '#fff',
+                },
+              },
+            }}
+          />
+          <Header />
+          <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+            {children}
+          </main>
+        </UserProvider>
       </body>
     </html>
   );

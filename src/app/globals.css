@@ -24,3 +24,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes highlight {
+  0% { background-color: #fefcbf; }
+  100% { background-color: #fde68a; }
+}
+.animate-highlight {
+  animation: highlight 0.7s;
+}

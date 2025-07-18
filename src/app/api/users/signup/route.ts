@@ -38,7 +38,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "User with this email or phone already exists." }, { status: 409 });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, phone, password: hashedPassword });
+    // Generate a unique 5-6 digit userId
+    let userId;
+    let isUnique = false;
+    while (!isUnique) {
+      userId = Math.floor(10000 + Math.random() * 900000); // 5-6 digit number
+      const existingId = await User.findOne({ userId });
+      if (!existingId) isUnique = true;
+    }
+    const user = new User({ name, email, phone, password: hashedPassword, userId });
     await user.save();
     return NextResponse.json({ message: "User created successfully." }, { status: 201 });
   } catch (error) {
