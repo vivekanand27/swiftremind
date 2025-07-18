@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import Spinner from "./components/Spinner";
 
 const HomePage = () => {
   const router = useRouter();
@@ -44,7 +45,7 @@ const HomePage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
-        <div className="text-blue-700 text-xl font-semibold animate-pulse">Loading...</div>
+        <Spinner />
       </div>
     );
   }

@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import Spinner from "../components/Spinner";
 
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState(""); // email or phone
@@ -56,7 +57,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 relative">
+      {loading && (
+        <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center z-50">
+          <Spinner />
+        </div>
+      )}
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
         <h1 className="text-3xl font-bold text-center mb-6 text-blue-700">Login</h1>
         <form onSubmit={onLogin} className="space-y-5">
