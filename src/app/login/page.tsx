@@ -3,23 +3,47 @@ import React, { useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // email or phone
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [identifierError, setIdentifierError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const router = useRouter();
 
-  const buttonDisabled = loading || !email || !password;
+  const buttonDisabled = loading; // Only disable when loading
 
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIdentifierError("");
+    setPasswordError("");
     setLoading(true);
-    setError(null);
+    let hasError = false;
+    if (!identifier) {
+      setIdentifierError("Email or phone is required.");
+      hasError = true;
+    }
+    if (!password) {
+      setPasswordError("Password is required.");
+      hasError = true;
+    }
+    if (hasError) {
+      setLoading(false);
+      return;
+    }
     try {
-      const res = await axios.post("/api/users/login", { email, password });
-      toast.success("Login successful!");
-      window.location.href = "/";
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+      const payload = isEmail ? { email: identifier, password } : { phone: identifier, password };
+      const res = await axios.post("/api/users/login", payload);
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+        toast.success("Login successful!");
+        router.push("/");
+      } else {
+        toast.error("No token received from server.");
+      }
     } catch (err: any) {
       toast.error(
         err.response?.data?.message ||
@@ -37,16 +61,19 @@ const LoginPage = () => {
         <h1 className="text-3xl font-bold text-center mb-6 text-blue-700">Login</h1>
         <form onSubmit={onLogin} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-1">Email or Phone Number</label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              id="identifier"
+              type="text"
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
+              placeholder="Enter your email or phone number"
               required
               className="w-full px-4 py-2 border border-gray-500 bg-gray-100 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
+            {identifierError && (
+              <div className="text-red-600 text-xs mt-1">{identifierError}</div>
+            )}
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -59,6 +86,9 @@ const LoginPage = () => {
               required
               className="w-full px-4 py-2 border border-gray-500 bg-gray-100 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
+            {passwordError && (
+              <div className="text-red-600 text-xs mt-1">{passwordError}</div>
+            )}
           </div>
           <button
             type="submit"

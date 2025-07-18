@@ -10,13 +10,17 @@ const HomePage = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        router.push("/login");
+        setLoading(false);
+        return;
+      }
       try {
-        const res = await axios.get("/api/users/profile");
-        if (res.status !== 200) {
-          router.push("/login");
-        } else {
-          setUser(res.data.user);
-        }
+        const res = await axios.get("/api/users/profile", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUser(res.data.user);
       } catch {
         router.push("/login");
       } finally {
@@ -27,7 +31,13 @@ const HomePage = () => {
   }, [router]);
 
   const handleLogout = async () => {
-    await axios.post('/api/users/logout');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (token) {
+      await axios.post('/api/users/logout', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      localStorage.removeItem('token');
+    }
     router.push('/logout');
   };
 
