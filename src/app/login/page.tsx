@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import { toast } from 'react-hot-toast';
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -17,9 +18,10 @@ const LoginPage = () => {
     setError(null);
     try {
       const res = await axios.post("/api/users/login", { email, password });
+      toast.success("Login successful!");
       window.location.href = "/";
     } catch (err: any) {
-      setError(
+      toast.error(
         err.response?.data?.message ||
         err.message ||
         "An error occurred. Please try again."
@@ -58,11 +60,6 @@ const LoginPage = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
           </div>
-          {error && (
-            <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded p-2">
-              {error}
-            </div>
-          )}
           <button
             type="submit"
             disabled={buttonDisabled}
