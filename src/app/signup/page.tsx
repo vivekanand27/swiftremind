@@ -38,7 +38,7 @@ const SignupPage = () => {
     setError(null);
     setSuccess(null);
     if (!email && !phone) {
-      toast.error("Please enter either an email or a phone number.");
+      toast.error("Either email or phone is required to sign up.");
       return;
     }
     if (password !== confirmPassword) {
@@ -100,11 +100,6 @@ const SignupPage = () => {
               className="w-full px-4 py-2 border border-gray-500 bg-gray-100 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
-          <div className="flex items-center my-2">
-            <div className="flex-grow h-px bg-gray-300" />
-            <span className="mx-3 text-gray-500 font-semibold">OR</span>
-            <div className="flex-grow h-px bg-gray-300" />
-          </div>
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
               Phone Number <span className="text-red-500">*</span>
@@ -131,9 +126,11 @@ const SignupPage = () => {
               required
               className="w-full px-4 py-2 border border-gray-500 bg-gray-100 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
-            <div className={`mt-1 text-xs rounded px-2 py-1 ${password.length === 0 ? 'text-gray-500 bg-gray-50 border border-gray-100' : password.length >= 6 ? 'text-green-700 bg-green-50 border border-green-200' : 'text-red-700 bg-red-50 border border-red-200'}`}>
-              Password must be at least 6 characters long.
-            </div>
+            {password.length > 0 && (
+              <div className={`mt-1 text-xs rounded px-2 py-1 ${password.length >= 6 ? 'text-green-700 bg-green-50 border border-green-200' : 'text-red-700 bg-red-50 border border-red-200'}`}>
+                Password must be at least 6 characters long.
+              </div>
+            )}
           </div>
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
@@ -148,14 +145,16 @@ const SignupPage = () => {
               required
               className="w-full px-4 py-2 border border-gray-500 bg-gray-100 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
-            <div className={`mt-1 text-xs rounded px-2 py-1 ${confirmPassword.length === 0 ? 'text-gray-500 bg-gray-50 border border-gray-100' : confirmPassword === password ? 'text-green-700 bg-green-50 border border-green-200' : 'text-red-700 bg-red-50 border border-red-200'}`}>
-              {confirmPassword.length === 0 ? 'Please confirm your password.' : confirmPassword === password ? 'Passwords match.' : 'Passwords do not match.'}
-            </div>
+            {confirmPassword.length > 0 && (
+              <div className={`mt-1 text-xs rounded px-2 py-1 ${confirmPassword === password ? 'text-green-700 bg-green-50 border border-green-200' : 'text-red-700 bg-red-50 border border-red-200'}`}>
+                {confirmPassword === password ? 'Passwords match.' : 'Passwords do not match.'}
+              </div>
+            )}
           </div>
           <button
             type="submit"
-            disabled={buttonDisabled}
-            className={`w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-200 ${buttonDisabled ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+            disabled={loading}
+            className={`w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-200 ${loading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
           >
             {loading ? "Signing up..." : "Sign Up"}
           </button>

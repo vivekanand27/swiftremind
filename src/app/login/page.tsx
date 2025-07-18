@@ -45,7 +45,7 @@ const LoginPage = () => {
               onChange={e => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full px-4 py-2 border border-gray-500 bg-gray-100 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
           <div>
@@ -57,7 +57,7 @@ const LoginPage = () => {
               onChange={e => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full px-4 py-2 border border-gray-500 bg-gray-100 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
           <button
