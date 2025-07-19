@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       throw new Error("JWT_SECRET is not set in environment variables.");
     }
     const token = jwt.sign(
-      { id: user._id, email: user.email, name: user.name, phone: user.phone },
+      { id: user._id, email: user.email, name: user.name, phone: user.phone, role: user.role },
       JWT_SECRET,
       { expiresIn: "7d" }
     );

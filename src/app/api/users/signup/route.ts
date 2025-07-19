@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       const existingId = await User.findOne({ userId });
       if (!existingId) isUnique = true;
     }
-    const user = new User({ name, email, phone, password: hashedPassword, userId });
+    const user = new User({ name, email, phone, password: hashedPassword, userId, role: 'user' });
     await user.save();
     return NextResponse.json({ message: "User created successfully." }, { status: 201 });
   } catch (error) {

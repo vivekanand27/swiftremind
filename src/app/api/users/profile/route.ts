@@ -23,7 +23,10 @@ export async function GET(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ message: "User not found" }, { status: 404 });
   }
-  delete user.password;
+  if (user && typeof user === 'object' && 'password' in user) {
+    delete user.password;
+  }
+  // user.role is included in the response
   return NextResponse.json({ user }, { status: 200 });
 }
 

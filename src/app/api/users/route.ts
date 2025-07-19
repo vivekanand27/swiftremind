@@ -21,20 +21,23 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(searchParams.get("limit") || "5", 10);
   const skip = (page - 1) * limit;
   const search = searchParams.get("search") || "";
-  let query: any = {};
+  const showDeleted = searchParams.get("showDeleted") === "true";
+  let query: any = showDeleted ? {} : { deleted: { $ne: true } };
   if (search) {
     const regex = new RegExp(search, "i");
-    query = {
-      $or: [
-        { name: regex },
-        { email: regex },
-        { phone: regex }
-      ]
-    };
+    query.$or = [
+      { name: regex },
+      { email: regex },
+      { phone: regex }
+    ];
   }
+  const sortField = searchParams.get("sort") || "userId";
+  const sortOrder = searchParams.get("order") === "desc" ? -1 : 1;
+  const sortObj: any = {};
+  sortObj[sortField] = sortOrder;
   const total = await User.countDocuments(query);
   const users = await User.find(query, { userId: 1, name: 1, email: 1, phone: 1, _id: 0 })
-    .sort({ userId: 1 })
+    .sort(sortObj)
     .skip(skip)
     .limit(limit)
     .lean();

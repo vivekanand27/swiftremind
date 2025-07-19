@@ -9,6 +9,7 @@ interface User {
   name?: string;
   email?: string;
   phone?: string;
+  role?: 'user' | 'admin';
   // Add other user fields as needed
 }
 
