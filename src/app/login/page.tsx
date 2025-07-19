@@ -66,7 +66,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 relative">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 relative">
       {formLoading && (
         <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center z-50">
           <Spinner />

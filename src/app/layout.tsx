@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from 'react-hot-toast';
-import Header from "./components/Header";
-import { UserProvider } from "@/hooks/UserContext";
+import LayoutWithSidebar from "./components/LayoutWithSidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,37 +25,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
-      >
-        <UserProvider>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: '#1e293b', // dark blue-gray
-                color: '#fff',
-                // fontWeight: 'bold', // Remove bold text
-              },
-              success: {
-                style: {
-                  background: '#22c55e', // green
-                  color: '#fff',
-                },
-              },
-              error: {
-                style: {
-                  background: '#ef4444', // red
-                  color: '#fff',
-                },
-              },
-            }}
-          />
-          <Header />
-          <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
-            {children}
-          </main>
-        </UserProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen bg-gradient-to-br from-blue-50 to-blue-100`}>
+        <LayoutWithSidebar>{children}</LayoutWithSidebar>
       </body>
     </html>
   );
