@@ -35,7 +35,7 @@ export async function DELETE(req: NextRequest, context: any) {
 
 export async function PATCH(req: NextRequest, context: any) {
   await connectDB();
-  const { params } = await context;
+  const { params } = context;
   const JWT_SECRET = process.env.JWT_SECRET;
   const decoded = getUserFromToken(req, JWT_SECRET);
   if (!decoded || decoded.role !== 'admin') {

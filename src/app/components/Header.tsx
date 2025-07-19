@@ -41,17 +41,6 @@ const Header = () => {
     router.push('/logout');
   };
 
-  if (loading) {
-    return (
-      <header className="w-full bg-white dark:bg-gray-900 shadow flex items-center border-b border-gray-200 dark:border-gray-800 px-4 py-1 fixed top-0 left-0 z-50 h-14">
-        <div className="flex-1" />
-        <Spinner />
-      </header>
-    );
-  }
-
-  if (!user) return null;
-
   return (
     <header className="w-full bg-white dark:bg-gray-900 shadow flex items-center border-b border-gray-200 dark:border-gray-800 px-4 py-1 fixed top-0 left-0 z-50 h-14">
       <div className="flex items-center flex-1 gap-4">
@@ -68,7 +57,9 @@ const Header = () => {
             onClick={() => setDropdownOpen((open) => !open)}
             className="flex items-center gap-2 px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
           >
-            <span className="truncate max-w-[120px]">{user.name || user.email || user.phone || "User"}</span>
+            <span className="truncate max-w-[120px]">
+              {loading ? 'Loading...' : (user?.name || user?.email || user?.phone || "User")}
+            </span>
             <svg className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
           </button>
           {dropdownOpen && (

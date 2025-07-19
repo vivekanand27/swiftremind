@@ -56,6 +56,9 @@ const UsersPage = () => {
   const [showDeleted, setShowDeleted] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ name: '', email: '', phone: '', password: '', role: 'user' });
+  const [addLoading, setAddLoading] = useState(false);
 
   const fetchUsers = async (pageNum = 1, searchQuery = "", sortField = sortBy, sortDir = sortOrder, showDeletedParam = showDeleted) => {
     setUsersLoading(true);
@@ -125,6 +128,25 @@ const UsersPage = () => {
     setPage(1);
   };
 
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddLoading(true);
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      await axios.post('/api/users/signup', addForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('User created successfully');
+      setShowAddModal(false);
+      setAddForm({ name: '', email: '', phone: '', password: '', role: 'user' });
+      fetchUsers(page, search, sortBy, sortOrder, showDeleted);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to create user');
+    } finally {
+      setAddLoading(false);
+    }
+  };
+
   // Always keep the search input focused after every render
   useEffect(() => {
     if (searchInputRef.current && document.activeElement !== searchInputRef.current) {
@@ -156,6 +178,7 @@ const UsersPage = () => {
               <th className="py-2 px-4 text-left text-blue-700">Email</th>
               <th className="py-2 px-4 text-left text-blue-700">Phone</th>
               <th className="py-2 px-4 text-left text-blue-700">Role</th>
+              <th className="py-2 px-4 text-left text-blue-700">Status</th>
               <th className="py-2 px-4 text-left text-blue-700" style={{minWidth: '120px'}}>Actions</th>
             </tr>
           </thead>
@@ -171,19 +194,29 @@ const UsersPage = () => {
     <div className="w-full max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-8 sm:p-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-blue-700">All Users</h1>
-        <label className="flex items-center gap-2 cursor-pointer select-none font-medium">
-          <span className="text-sm text-gray-700">Show Deleted Users</span>
-          <button
-            type="button"
-            onClick={() => setShowDeleted(v => !v)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${showDeleted ? 'bg-blue-600' : 'bg-gray-300'}`}
-            aria-pressed={showDeleted}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${showDeleted ? 'translate-x-5' : 'translate-x-1'}`}
-            />
-          </button>
-        </label>
+        <div className="flex items-center gap-4">
+          {user?.role === 'admin' && (
+            <button
+              onClick={() => router.push('/users/create')}
+              className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow"
+            >
+              + Add User
+            </button>
+          )}
+          <label className="flex items-center gap-2 cursor-pointer select-none font-medium">
+            <span className="text-sm text-gray-700">Show Deleted Users</span>
+            <button
+              type="button"
+              onClick={() => setShowDeleted(v => !v)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${showDeleted ? 'bg-blue-600' : 'bg-gray-300'}`}
+              aria-pressed={showDeleted}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${showDeleted ? 'translate-x-5' : 'translate-x-1'}`}
+              />
+            </button>
+          </label>
+        </div>
       </div>
       <div className="mb-4 text-gray-700 font-medium">Total: {total}</div>
       <form className="mb-4 flex gap-2 relative" onSubmit={e => e.preventDefault()}>
@@ -245,6 +278,7 @@ const UsersPage = () => {
                 Phone {sortBy === 'phone' && (sortOrder === 'asc' ? '▲' : '▼')}
               </th>
               <th className="py-2 px-4 text-left text-blue-700">Role</th>
+              <th className="py-2 px-4 text-left text-blue-700">Status</th>
               {user?.role === 'admin' && (
                 <th className="py-2 px-4 text-left text-blue-700" style={{minWidth: '120px'}}>Actions</th>
               )}
@@ -253,7 +287,7 @@ const UsersPage = () => {
           <tbody className={usersLoading ? 'opacity-50' : 'transition-opacity duration-500 opacity-100'}>
             {users.length === 0 ? (
               <tr>
-                <td colSpan={user?.role === 'admin' ? 6 : 5} className="py-8 text-center text-gray-400 text-lg">
+                <td colSpan={user?.role === 'admin' ? 7 : 6} className="py-8 text-center text-gray-400 text-lg">
                   <div className="flex flex-col items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 018 0v2m-4-4a4 4 0 00-8 0v2m8-2a4 4 0 00-8 0v2m8-2a4 4 0 00-8 0v2" /></svg>
                     No users found.
@@ -262,35 +296,21 @@ const UsersPage = () => {
               </tr>
             ) : (
               users.map(u => (
-                <tr key={u.userId} className={`border-b hover:bg-blue-50 transition-colors ${u.deleted ? 'bg-gray-100 text-gray-400 line-through' : ''} animate-fade-in`}>
+                <tr key={u.userId} className={`border-b hover:bg-blue-50 transition-colors ${u.deleted ? 'bg-gray-100 text-gray-400' : ''} animate-fade-in`}>
                   <td className="py-2 px-4 font-mono text-gray-800">{u.userId}</td>
                   <td className="py-2 px-4 text-gray-800">{highlightMatch(u.name || "", search)}</td>
                   <td className="py-2 px-4 text-gray-800">{highlightMatch(u.email || "", search) || <span className="italic text-gray-400">N/A</span>}</td>
                   <td className="py-2 px-4 text-gray-800">{highlightMatch(u.phone || "", search) || <span className="italic text-gray-400">N/A</span>}</td>
                   <td className="py-2 px-4 text-gray-800">
-                    {user?.role === 'admin' && user.userId !== u.userId ? (
-                      <select
-                        value={u.role || 'user'}
-                        disabled={u.deleted}
-                        onChange={async (e) => {
-                          try {
-                            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-                            await axios.patch(`/api/users/${u.userId}`, { role: e.target.value }, {
-                              headers: { Authorization: `Bearer ${token}` }
-                            });
-                            toast.success('Role updated');
-                            fetchUsers(page, search, sortBy, sortOrder, showDeleted);
-                          } catch {
-                            toast.error('Failed to update role');
-                          }
-                        }}
-                        className="border rounded px-2 py-1"
-                      >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                      </select>
+                    <span className="capitalize px-2 py-1 rounded bg-gray-100 border border-gray-300 text-gray-700 font-semibold">
+                      {u.role || 'user'}
+                    </span>
+                  </td>
+                  <td className="py-2 px-4">
+                    {u.deleted ? (
+                      <span className="px-2 py-1 rounded bg-red-100 text-red-700 font-semibold border border-red-200">Inactive</span>
                     ) : (
-                      <span className="capitalize">{u.role || 'user'}</span>
+                      <span className="px-2 py-1 rounded bg-green-100 text-green-700 font-semibold border border-green-200">Active</span>
                     )}
                   </td>
                   {user?.role === 'admin' && (

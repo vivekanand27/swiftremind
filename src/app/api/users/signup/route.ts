@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import User from "@/models/User";
 import { connectDB } from "@/dbconfig/dbconfig";
+import jwt from "jsonwebtoken";
 
 function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -19,7 +20,7 @@ function validatePassword(password: string) {
 export async function POST(req: Request) {
   await connectDB();
   try {
-    const { name, email, phone, password } = await req.json();
+    const { name, email, phone, password, role } = await req.json();
     if (!name || (!email && !phone) || !password) {
       return NextResponse.json({ message: "Name, password, and either email or phone are required." }, { status: 400 });
     }
@@ -46,7 +47,20 @@ export async function POST(req: Request) {
       const existingId = await User.findOne({ userId });
       if (!existingId) isUnique = true;
     }
-    const user = new User({ name, email, phone, password: hashedPassword, userId, role: 'user' });
+    // Determine role: only allow admin to set role, otherwise default to 'user'
+    let finalRole = 'user';
+    const authHeader = req.headers.get("authorization");
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (authHeader && authHeader.startsWith("Bearer ") && JWT_SECRET) {
+      const token = authHeader.split(" ")[1];
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (typeof decoded === 'object' && decoded.role === 'admin' && (role === 'admin' || role === 'user')) {
+          finalRole = role;
+        }
+      } catch {}
+    }
+    const user = new User({ name, email, phone, password: hashedPassword, userId, role: finalRole });
     await user.save();
     return NextResponse.json({ message: "User created successfully." }, { status: 201 });
   } catch (error) {

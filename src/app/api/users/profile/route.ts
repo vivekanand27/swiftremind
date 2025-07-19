@@ -26,7 +26,10 @@ export async function GET(req: NextRequest) {
   if (user && typeof user === 'object' && 'password' in user) {
     delete user.password;
   }
-  // user.role is included in the response
+  // Ensure userId is present in the response
+  if (user && typeof user === 'object' && 'userId' in user) {
+    return NextResponse.json({ user: { ...user, userId: user.userId } }, { status: 200 });
+  }
   return NextResponse.json({ user }, { status: 200 });
 }
 

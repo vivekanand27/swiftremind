@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
   const sortObj: any = {};
   sortObj[sortField] = sortOrder;
   const total = await User.countDocuments(query);
-  const users = await User.find(query, { userId: 1, name: 1, email: 1, phone: 1, _id: 0 })
+  const users = await User.find(query, { userId: 1, name: 1, email: 1, phone: 1, role: 1, deleted: 1, _id: 0 })
     .sort(sortObj)
     .skip(skip)
     .limit(limit)

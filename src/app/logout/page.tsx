@@ -6,11 +6,7 @@ const LogoutPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Here you would clear auth/session if implemented
-    const timer = setTimeout(() => {
-      router.push("/login");
-    }, 1500);
-    return () => clearTimeout(timer);
+    router.push("/login");
   }, [router]);
 
   return (

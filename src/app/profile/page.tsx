@@ -90,7 +90,7 @@ export default function ProfilePage() {
       <h1 className="text-2xl font-bold text-blue-700 mb-4">Profile</h1>
       {user && (
         <div className="space-y-2">
-          <div><span className="font-extrabold text-black">User ID:</span> <span className="font-bold text-gray-900">{user.id || user._id || <span className="italic text-gray-400">Not provided</span>}</span></div>
+          <div><span className="font-extrabold text-black">User ID:</span> <span className="font-bold text-gray-900">{user.userId || <span className="italic text-gray-400">Not provided</span>}</span></div>
           <div><span className="font-extrabold text-black">Name:</span> <span className="font-bold text-gray-900">{user.name || <span className="italic text-gray-400">Not provided</span>}</span></div>
           <div><span className="font-extrabold text-black">Email:</span> <span className="font-bold text-gray-900">{user.email || <span className="italic text-gray-400">Not provided</span>}</span></div>
           <div><span className="font-extrabold text-black">Phone:</span> <span className="font-bold text-gray-900">{user.phone || <span className="italic text-gray-400">Not provided</span>}</span></div>
