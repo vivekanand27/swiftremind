@@ -18,6 +18,7 @@ const UserSchema: Schema = new Schema({
   password: { type: String, required: true },
   userId: { type: Number, unique: true, required: true },
   role: { type: String, enum: ['superadmin', 'admin', 'user'], default: 'user', required: true },
+  organisationId: { type: Schema.Types.ObjectId, ref: 'Organisation' },
   deleted: { type: Boolean, default: false },
 });
 

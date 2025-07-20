@@ -1,13 +1,32 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
 const AddUserPage = () => {
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', role: 'user' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', role: 'user', organisationId: '' });
   const [loading, setLoading] = useState(false);
+  const [organisations, setOrganisations] = useState([]);
+
+  useEffect(() => {
+    // Only fetch organisations if not superadmin
+    if (form.role !== 'superadmin') {
+      const fetchOrganisations = async () => {
+        try {
+          const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+          const res = await axios.get('/api/organisations', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setOrganisations(res.data.organisations || []);
+        } catch (err) {
+          toast.error('Failed to fetch organisations');
+        }
+      };
+      fetchOrganisations();
+    }
+  }, [form.role]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,6 +34,11 @@ const AddUserPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Require organisationId for non-superadmin
+    if (form.role !== 'superadmin' && !form.organisationId) {
+      toast.error('Please select an organisation');
+      return;
+    }
     setLoading(true);
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -87,8 +111,27 @@ const AddUserPage = () => {
             >
               <option value="user">User</option>
               <option value="admin">Admin</option>
+              <option value="superadmin">Superadmin</option>
             </select>
           </div>
+          {/* Organisation dropdown for non-superadmin */}
+          {form.role !== 'superadmin' && (
+            <div>
+              <label className="block text-sm font-bold text-black mb-1">Organisation</label>
+              <select
+                name="organisationId"
+                value={form.organisationId}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-900"
+                required
+              >
+                <option value="">Select organisation</option>
+                {organisations.map((org: any) => (
+                  <option key={org._id} value={org._id}>{org.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             type="submit"
             className="w-full py-2 px-4 rounded-md text-white font-semibold transition-colors duration-200 bg-blue-600 hover:bg-blue-700"

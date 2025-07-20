@@ -8,7 +8,7 @@ interface User {
   name?: string;
   email?: string;
   phone?: string;
-  role?: 'user' | 'admin';
+  role?: 'superadmin' | 'admin' | 'user';
   // Add other user fields as needed
 }
 

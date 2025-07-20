@@ -20,7 +20,7 @@ function validatePassword(password: string) {
 export async function POST(req: Request) {
   await connectDB();
   try {
-    const { name, email, phone, password, role } = await req.json();
+    const { name, email, phone, password, role, organisationId } = await req.json();
     if (!name || (!email && !phone) || !password) {
       return NextResponse.json({ message: "Name, password, and either email or phone are required." }, { status: 400 });
     }
@@ -32,6 +32,10 @@ export async function POST(req: Request) {
     }
     if (!validatePassword(password)) {
       return NextResponse.json({ message: "Password must be at least 6 characters." }, { status: 400 });
+    }
+    // Require organisationId for non-superadmin
+    if (role !== 'superadmin' && !organisationId) {
+      return NextResponse.json({ message: "Organisation is required for non-superadmin users." }, { status: 400 });
     }
     // Check for existing user by email or phone
     const existingUser = await User.findOne({ $or: [email ? { email } : {}, phone ? { phone } : {}] });
@@ -60,7 +64,7 @@ export async function POST(req: Request) {
         }
       } catch {}
     }
-    const user = new User({ name, email, phone, password: hashedPassword, userId, role: finalRole });
+    const user = new User({ name, email, phone, password: hashedPassword, userId, role: finalRole, organisationId: finalRole !== 'superadmin' ? organisationId : undefined });
     await user.save();
     return NextResponse.json({ message: "User created successfully." }, { status: 201 });
   } catch (error) {

@@ -7,42 +7,69 @@ import { useUser } from "@/hooks/UserContext";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
-const Sidebar = () => {
+interface SidebarProps {
+  onCollapseChange?: (collapsed: boolean) => void;
+}
+
+const Sidebar = ({ onCollapseChange }: SidebarProps) => {
   const pathname = usePathname();
-  const { user, setUser } = useUser();
+  const { user, loading, setUser } = useUser();
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
 
-  const navLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: <HiOutlineHome size={22} /> },
-    { href: "/customers", label: "Customers", icon: <HiOutlineUserGroup size={22} /> },
-    { href: "/users", label: "Users", icon: <HiOutlineUser size={22} /> },
-    { href: "/reminders", label: "Reminders", icon: <HiOutlineClipboard size={22} /> },
-    { href: "/notifications", label: "Notifications", icon: <HiOutlineBell size={22} /> },
-    ...(user?.role === "superadmin"
-      ? [{ href: "/organisations", label: "Organisations", icon: <HiOutlineBuildingOffice2 size={22} /> }]
-      : []),
-    { href: "/profile", label: "Profile", icon: <HiOutlineCog size={22} /> },
-  ];
+  const handleCollapseChange = (newCollapsed: boolean) => {
+    setCollapsed(newCollapsed);
+    onCollapseChange?.(newCollapsed);
+  };
+
+  // Build navigation links based on user role and loading state
+  const getNavLinks = () => {
+    const baseLinks = [
+      { href: "/dashboard", label: "Dashboard", icon: <HiOutlineHome size={22} /> },
+      { href: "/customers", label: "Customers", icon: <HiOutlineUserGroup size={22} /> },
+      { href: "/users", label: "Users", icon: <HiOutlineUser size={22} /> },
+    ];
+    // Show Reminders and Notifications for superadmin and admin
+    if (!loading && (user?.role === "superadmin" || user?.role === "admin")) {
+      baseLinks.push(
+        { href: "/reminders", label: "Reminders", icon: <HiOutlineClipboard size={22} /> },
+        { href: "/notifications", label: "Notifications", icon: <HiOutlineBell size={22} /> }
+      );
+    }
+    // Only show organizations link if user is loaded and is superadmin
+    if (!loading && user?.role === "superadmin") {
+      baseLinks.push({ 
+        href: "/organisations", 
+        label: "Organisations", 
+        icon: <HiOutlineBuildingOffice2 size={22} /> 
+      });
+    }
+    baseLinks.push({ href: "/profile", label: "Profile", icon: <HiOutlineCog size={22} /> });
+    return baseLinks;
+  };
+
+  const navLinks = getNavLinks();
 
   const handleLogout = async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (token) {
+    try {
       await axios.post('/api/users/logout', {}, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
+    } catch (e) {
+      // Ignore errors, always clear token
+    } finally {
       localStorage.removeItem('token');
-      setUser(null);
+      setUser && setUser(null); // If setUser is available from context
+      router.push('/login'); // Redirect to login page
     }
-    router.push('/logout');
   };
 
   return (
     <aside className={`h-screen bg-white shadow-lg flex flex-col py-6 px-2 fixed top-0 left-0 z-40 transition-all duration-200 ${collapsed ? 'w-16' : 'w-60'}`}>
       <div className={`mb-4 flex items-center ${collapsed ? 'px-0 justify-center' : 'px-2'}`}>
-        <span className={`text-2xl font-bold text-blue-700 transition-all duration-200 ${collapsed ? 'text-center w-full' : ''}`}>{collapsed ? 'S' : 'SwiftRemind'}</span>
+        <span className={`text-2xl font-bold text-blue-700 transition-all duration-200 ${collapsed ? 'text-center w-full' : ''}`}>{collapsed ? '' : 'SwiftRemind'}</span>
         <button
-          onClick={() => setCollapsed(c => !c)}
+          onClick={() => handleCollapseChange(!collapsed)}
           className="ml-auto bg-white text-blue-600 border border-blue-100 shadow p-2 rounded-full hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
